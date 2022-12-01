@@ -1,17 +1,9 @@
-:root {
-  --bg:#eee;
-  --white : #fff;
-  --black : #000;
-  --main_color : #0d6efd
-  /* --box_shadow :  */
-}
+
 * {
   box-sizing: border-box;
   text-transform: capitalize;
 }
-body {
-  background-color: var(--bg) ;
-}
+
 .search_cont {
   text-align: center;
 }

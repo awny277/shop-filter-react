@@ -21,13 +21,14 @@ const ProductsSlice = createSlice({
   initialState: {
     isLoading: false,
     error: null,
-    ProductsArr: [],
+    ProductsArr: null,
   },
   extraReducers: {
     //  getOffers
     [getProducts.pending]: (state, action) => {},
     [getProducts.fulfilled]: (state, action) => {
       console.log(action);
+      state.ProductsArr = action.payload;
     },
     [getProducts.rejected]: (state, action) => {
       console.log(action);

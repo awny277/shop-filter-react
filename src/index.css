@@ -1,0 +1,10 @@
+:root {
+  --bg:#eee;
+  --white : #fff;
+  --black : #000;
+  --main_color : #0d6efd
+  /* --box_shadow :  */
+}
+body {
+  background-color: var(--bg) !important ;
+}
