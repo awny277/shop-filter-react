@@ -1,73 +1,87 @@
 import "./App.css";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Accordion from "react-bootstrap/Accordion";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "./store/ProductsSlice";
 // AiFillStar AiOutlineStar
 function App() {
-  const Protype = useRef(null);
+  const [page, setPage] = useState(1);
+  // const Protype = useRef(null);
   const [search, setsearch] = useState("");
   const [rate, setRate] = useState([]);
   const [range, setRange] = useState("100");
   const [type, setType] = useState([]);
+  const [checkArr, setCheckArr] = useState([]);
   const dispatch = useDispatch();
   const { ProductsArr } = useSelector((state) => state.ProductsSlice);
   useEffect(() => {
-    if (!ProductsArr) {
-      dispatch(getProducts());
+    if (ProductsArr.length <= 0) {
+      dispatch(getProducts(page));
     }
-  }, [dispatch, ProductsArr]);
-  // if (Protype.current.foucs) {
-  //   console.log("hello");
-  // }
+  }, [dispatch, ProductsArr, page]);
+
   const typeHandeller = (e) => {
     if (e.target.checked) {
       setType((oldArray) => [...oldArray, e.target.value]);
-      // console.log(type);
-      // console.log("hi");
+      setCheckArr((oldArray) => [...oldArray, e.target.value]);
     } else {
-      if (type.length <= 1) {
-        setType((oldArray) => [...oldArray, e.target.value]);
-      } else {
-        setType(type.filter((item) => item !== e.target.value));
-      }
+      setCheckArr(type.filter((item) => item !== e.target.value));
+      setType(type.filter((item) => item !== e.target.value));
     }
   };
-  useEffect(() => {
-    if (rate.length === 0) {
-      let AllRate = [1, 2, 3, 4, 5];
-      setRate((oldArray) => [...oldArray, ...AllRate]);
-    }
-  }, [rate.length]);
-  const RateHandeller = (e) => {
-    // if (rate.length === 0) {
-    //   let AllRate = [1, 2, 3, 4, 5];
-    //   setRate((oldArray) => [...oldArray, ...AllRate]);
-    // } else {
 
-    // }
+  const RateHandeller = (e) => {
     if (e.target.checked) {
       setRate((oldArray) => [...oldArray, e.target.value]);
-      // console.log(type);
-      // console.log("hi");
+      setCheckArr((oldArray) => [...oldArray, e.target.value]);
     } else {
+      setCheckArr(type.filter((item) => item !== e.target.value));
       setRate(type.filter((item) => item !== e.target.value));
-      // if (type.length <= 1) {
-      //   setRate((oldArray) => [...oldArray, e.target.value]);
-      // } else {
-
-      // }
     }
   };
   const Products =
     ProductsArr &&
+    checkArr.length > 0 &&
+    ProductsArr.filter(
+      (ele) =>
+        (ele.name.toLowerCase().includes(search.toLowerCase()) &&
+          ele.price <= parseInt(range) &&
+          type.includes(ele.type) &&
+          rate.includes(`${ele.rate}`)) ||
+        (ele.name.toLowerCase().includes(search.toLowerCase()) &&
+          ele.price <= parseInt(range) &&
+          type.includes(ele.type) &&
+          !rate.includes(`${ele.rate}`)) ||
+        (ele.name.toLowerCase().includes(search.toLowerCase()) &&
+          ele.price <= parseInt(range) &&
+          rate.includes(`${ele.rate}`) &&
+          !type.includes(ele.type))
+    )
+      // .filter((ele) => rate.includes(`${ele.rate}`))
+      .map((ele, idx) => {
+        return (
+          <div className="col-md-4 item" key={idx}>
+            <img className="ProductImage" src={ele.image} alt={ele.name} />
+            <h5 className="ProductName">{ele.name}</h5>
+            <p className="type">{ele.type}</p>
+            <span className="Price"> {ele.price}EGP</span>
+            <a className="Details" href="/">
+              {" "}
+              Details
+            </a>
+            <p>rate :{ele.rate}</p>
+          </div>
+        );
+      });
+
+  const ALlProduct =
+    ProductsArr &&
+    checkArr.length <= 0 &&
     ProductsArr.filter(
       (ele) =>
         ele.name.toLowerCase().includes(search.toLowerCase()) &&
-        ele.price <= parseInt(range) &&
-        // type.includes(ele.type) &&
-        rate.includes(`${ele.rate}`)
+        ele.price <= parseInt(range)
     ).map((ele, idx) => {
       return (
         <div className="col-md-4 item" key={idx}>
@@ -75,18 +89,19 @@ function App() {
           <h5 className="ProductName">{ele.name}</h5>
           <p className="type">{ele.type}</p>
           <span className="Price"> {ele.price}EGP</span>
-          {/* <AiFillStar className="active_star" />
-                        <AiOutlineStar className="Normal_star" /> */}
-          {/* {rate.map((ele, idx) => {
-            return <AiFillStar className="active_star" />;
-          })} */}
           <a className="Details" href="/">
             {" "}
             Details
           </a>
+          <p>rate :{ele.rate}</p>
         </div>
       );
     });
+
+  const GetMoreHandeller = () => {
+    dispatch(getProducts(page));
+  };
+
   return (
     <React.Fragment>
       <section className="search_cont">
@@ -115,7 +130,6 @@ function App() {
                     <div className="fil_cont">
                       <div>
                         <input
-                          ref={Protype}
                           type="checkbox"
                           id="shoes"
                           value="shoes"
@@ -127,14 +141,12 @@ function App() {
                       </div>
                       <div>
                         <input
-                          ref={Protype}
                           type="checkbox"
                           id="shirt"
                           value="shirt"
                           className="Fill check check"
                           placeholder="shirts"
                           onChange={typeHandeller}
-                          // onChange={(e) => setType(e.target.value)}
                         />
                         <label htmlFor="shirt">shirt</label>
                       </div>
@@ -249,27 +261,86 @@ function App() {
           <div className="col-md-8">
             <div className="container">
               <div className="row " id="productsContainer">
-                {Products}
+                {/* {Products} */}
+                {checkArr.length > 0 ? Products : ALlProduct}
               </div>
             </div>
           </div>
         </div>
       </section>
-      {/* <section className="container">
-    <div className="row align-items-center justify-content-center">
-      <div className="col-md-2">
-        <nav aria-label="Page navigation example" className="pagenation_nav">
-          <ul className="pagination">
-            <li className="page-item"><a className="page-link" id="btn_prev" onClick="prevPage(e)" href="/">&lt;</a></li>
-            <li className="page-item"><a className="page-link" href="#">1</a></li>
-            <li className="page-item"><a className="page-link" href="#">2</a></li>
-            <li className="page-item"><a className="page-link" href="#">3</a></li>
-            <li className="page-item"><a className="page-link" id="btn_next" onClick="nextPage(e)" href="/">&gt;</a></li>
-          </ul>
-        </nav>
-      </div>
-    </div>
-  </section> */}
+      <section className="container">
+        <div className="row align-items-center justify-content-center">
+          <div className="col-md-2">
+            <nav
+              aria-label="Page navigation example"
+              className="pagenation_nav"
+            >
+              <ul className="pagination">
+                <li className="page-item">
+                  <button
+                    className="page-link"
+                    id="btn_prev"
+                    onClick={() => {
+                      if (page <= 1) {
+                        setPage(1);
+                        GetMoreHandeller();
+                      } else {
+                        setPage((state) => state - 1);
+                        GetMoreHandeller();
+                      }
+                    }}
+                    // onClick="prevPage(e)"
+                  >
+                    &lt;
+                  </button>
+                </li>
+                <li className="page-item">
+                  <button
+                    className="page-link"
+                    onClick={() => {
+                      setPage(1);
+                      GetMoreHandeller();
+                    }}
+                  >
+                    1
+                  </button>
+                </li>
+                <li className="page-item">
+                  <button
+                    className="page-link"
+                    onClick={() => {
+                      setPage(2);
+                      GetMoreHandeller();
+                    }}
+                    // onChange={GetMoreHandeller}
+                  >
+                    2
+                  </button>
+                </li>
+                <li className="page-item">
+                  <button
+                    // onChange={GetMoreHandeller}
+                    className="page-link"
+                    id="btn_next"
+                    onClick={() => {
+                      if (page >= 2) {
+                        setPage(2);
+                        GetMoreHandeller();
+                      } else {
+                        setPage((state) => state + 1);
+                        GetMoreHandeller();
+                      }
+                    }}
+                    // onClick="nextPage(e)"
+                  >
+                    &gt;
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </section>
     </React.Fragment>
   );
 }

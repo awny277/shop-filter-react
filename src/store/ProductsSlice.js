@@ -7,7 +7,7 @@ export const getProducts = createAsyncThunk(
     const { rejectWithValue } = thunkAPI;
     try {
       const data = await axios
-        .get(`https://6351a0c99d64d7c71304d214.mockapi.io/Products`)
+        .get(`https://6351a0c99d64d7c71304d214.mockapi.io/Products/${Pid}`)
         .then((res) => res.data);
       return data;
     } catch (err) {
@@ -21,14 +21,20 @@ const ProductsSlice = createSlice({
   initialState: {
     isLoading: false,
     error: null,
-    ProductsArr: null,
+    ProductsArr: [],
   },
   extraReducers: {
     //  getOffers
-    [getProducts.pending]: (state, action) => {},
+    [getProducts.pending]: (state, action) => {
+      console.log(action);
+    },
     [getProducts.fulfilled]: (state, action) => {
       console.log(action);
-      state.ProductsArr = action.payload;
+      if (action.meta.arg === 1) {
+        state.ProductsArr = action.payload.Products;
+      } else {
+        state.ProductsArr = state.ProductsArr.concat(action.payload.Products);
+      }
     },
     [getProducts.rejected]: (state, action) => {
       console.log(action);
